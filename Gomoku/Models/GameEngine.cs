@@ -12,11 +12,11 @@ public class GameEngine
     private readonly BasicMcst<GomokuMove> _opponent;
     
     
-    public GameEngine(int size = Constants.DefaultBoardSize)
+    public GameEngine(int size = GomokuGame.DefaultBoardSize)
     {
         BoardSize = size;
         _game = new GomokuGame(size);
-        _opponent = new BasicMcst<GomokuMove>(10, 1);
+        _opponent = new BasicMcst<GomokuMove>(100, 1);
     }
 
     public void MakeMove(int row, int col)

@@ -7,9 +7,10 @@ public class GomokuGame : IMcstGame<GomokuMove>
     private int _result = Tiles.Empty;
     private int _moveCount = 0;
     
+    public const int DefaultBoardSize = 3;
     public int NextMove = Tiles.Black;
 
-    public GomokuGame(int size)
+    public GomokuGame(int size = DefaultBoardSize)
     {
         _board = new int[size, size];
         for (int i = 0; i < size; i++)
