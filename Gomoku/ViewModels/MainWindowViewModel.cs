@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using Avalonia.Media;
 using Gomoku.Models;
+using MCST;
 
 namespace Gomoku.ViewModels;
 
@@ -8,7 +9,7 @@ public class MainWindowViewModel : ViewModelBase
 {
     public ObservableCollection<ObservableCollection<TileViewModel>> Grid { get; set; }
 
-    private readonly GomokuEngine _engine = new();
+    private readonly GameEngine _engine = new();
 
     public MainWindowViewModel()
     {
@@ -37,8 +38,8 @@ public class MainWindowViewModel : ViewModelBase
 
     private static IBrush ConvertValueToColor(int value) => value switch
     {
-        1 => Constants.Player1ColorBrush,
-        2 => Constants.PLayer2ColorBrush,
+        Tiles.Black => Constants.Player1ColorBrush,
+        Tiles.White => Constants.PLayer2ColorBrush,
         _ => Constants.BoardColorBrush
     };
 }

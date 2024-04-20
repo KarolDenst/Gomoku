@@ -31,6 +31,6 @@ public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? pa
 
     public TMove GetBestMove()
     {
-        return Children.OrderByDescending(c => c._visits).Select(c => c.MoveMade).FirstOrDefault()!;
+        return Children.OrderByDescending(c => c._wins / c._visits).Select(c => c.MoveMade).FirstOrDefault()!;
     }
 }

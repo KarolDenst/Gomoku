@@ -1,22 +1,24 @@
 ﻿namespace MCST;
 
-public class BasicMcst<TMove>(IMcstGame<TMove> game, int iterations)
+public class BasicMcst<TMove>(int iterations, int scoreModifier = 1)
 {
-    public TMove FindBestMove()
+    private Random _random = new();
+    
+    public TMove FindBestMove(IMcstGame<TMove> game)
     {
         var rootNode = new Node<TMove>(game, default);
 
         for (int i = 0; i < iterations; i++)
         {
             var node = rootNode;
-            var moveHistory = new List<TMove>();
+            var moveHistory = new Stack<TMove>();
 
             // Selection
             while (node.UntriedMoves.Count == 0 && node.Children.Count > 0)
             {
                 node = node.SelectChild();
                 game.MakeMove(node.MoveMade);
-                moveHistory.Add(node.MoveMade);
+                moveHistory.Push(node.MoveMade);
             }
 
             // Expansion
@@ -24,7 +26,7 @@ public class BasicMcst<TMove>(IMcstGame<TMove> game, int iterations)
             {
                 var move = node.UntriedMoves.First();
                 game.MakeMove(move);
-                moveHistory.Add(move);
+                moveHistory.Push(move);
                 node = node.AddChild(move, game);
             }
 
@@ -32,23 +34,29 @@ public class BasicMcst<TMove>(IMcstGame<TMove> game, int iterations)
             while (!game.IsGameOver())
             {
                 var legalMoves = game.GetLegalMoves();
-                var randomMove = legalMoves[new Random().Next(legalMoves.Count)];
+                Console.WriteLine(1);
+                Console.WriteLine($"moves: {legalMoves.Count}");
+                var randomMove = legalMoves[_random.Next(legalMoves.Count)];
+                Console.WriteLine(2);
                 game.MakeMove(randomMove);
-                moveHistory.Add(randomMove);
+                moveHistory.Push(randomMove);
             }
 
             // Backpropagation
-            double result = game.GetResult();
+            double result = scoreModifier * game.GetResult();
             while (node != null)
             {
                 node.Update(result);
                 node = node.Parent;
                 if (node != null)  // Ensure we don't undo the move of the root node as it has no parent
                 {
-                    game.UndoMove(moveHistory.Last());
-                    moveHistory.RemoveAt(moveHistory.Count - 1);
+                    game.UndoMove(moveHistory.Pop());
                 }
             }
+            
+            // Cleanup
+            while (moveHistory.Count > 0)
+                game.UndoMove(moveHistory.Pop());
         }
 
         // Return the best move based on the most visited node
