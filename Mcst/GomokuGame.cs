@@ -6,6 +6,7 @@ public class GomokuGame : IMcstGame<GomokuMove>
     private readonly int[,] _board;
     private int _result = Tiles.Empty;
     private int _moveCount = 0;
+    private readonly Random _random = new();
     
     public const int DefaultBoardSize = 7;
     public int NextMove = Tiles.Black;
@@ -51,6 +52,17 @@ public class GomokuGame : IMcstGame<GomokuMove>
         }
 
         return moves;
+    }
+
+    public GomokuMove GetRandomMove()
+    {
+        while (true)
+        {
+            var row = _random.Next(_board.GetLength(0));
+            var col = _random.Next(_board.GetLength(1));
+            if (_board[row, col] == Tiles.Empty)
+                return new GomokuMove(row, col);
+        }
     }
 
     public void MakeMove(GomokuMove move)

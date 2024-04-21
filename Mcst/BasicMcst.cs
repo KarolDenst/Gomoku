@@ -71,8 +71,9 @@ public class BasicMcst<TMove>(int iterations, int scoreModifier = 1)
     {
         while (!game.IsGameOver())
         {
-            var legalMoves = game.GetLegalMoves();
-            var randomMove = legalMoves[_random.Next(legalMoves.Count)];
+            // var legalMoves = game.GetLegalMoves();
+            // var randomMove = legalMoves[_random.Next(legalMoves.Count)];
+            var randomMove = game.GetRandomMove();
             game.MakeMove(randomMove);
             moveHistory.Push(randomMove);
         }
