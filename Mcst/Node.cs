@@ -33,4 +33,23 @@ public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? pa
     {
         return Children.OrderByDescending(c => c._wins / c._visits).Select(c => c.MoveMade).FirstOrDefault()!;
     }
+    
+    public void MergeResults(Node<TMove> other)
+    {
+        if (!MoveMade!.Equals(other.MoveMade)) return;
+        _visits += other._visits;
+        _wins += other._wins;
+
+        foreach (var otherChild in other.Children)
+        {
+            var match = Children.Find(c => c.MoveMade!.Equals(otherChild.MoveMade));
+            if (match != null)
+            {
+                match._visits += otherChild._visits;
+                match._wins += otherChild._wins;
+            }
+            else
+                Children.Add(otherChild);
+        }
+    }
 }

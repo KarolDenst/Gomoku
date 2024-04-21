@@ -3,21 +3,14 @@ using MCST;
 
 namespace Gomoku.Models;
 
-public class GameEngine
+public class GameEngine(int size = GomokuGame.DefaultBoardSize)
 {
     public Action<int, int, int> BoardChanged = null!; // row, col, tile
-    public readonly int BoardSize;
+    public readonly int BoardSize = size;
 
-    private readonly GomokuGame _game;
-    private readonly BasicMcst<GomokuMove> _opponent;
-    
-    
-    public GameEngine(int size = GomokuGame.DefaultBoardSize)
-    {
-        BoardSize = size;
-        _game = new GomokuGame(size);
-        _opponent = new BasicMcst<GomokuMove>(100, 1);
-    }
+    private readonly GomokuGame _game = new(size);
+    private readonly BasicMcst<GomokuMove> _opponent = new(100000, 1);
+
 
     public void MakeMove(int row, int col)
     {
@@ -26,9 +19,10 @@ public class GameEngine
             return;
         BoardChanged?.Invoke(row, col, _game.NextMove);
         _game.MakeMove(move);
+        if (_game.IsGameOver())
+            return;
         
         var response = _opponent.FindBestMove(_game);
-        Console.WriteLine($"Row: {response.Row}, Col: {response.Col}");
         BoardChanged?.Invoke(response.Row, response.Col, _game.NextMove);
         _game.MakeMove(response);
     }

@@ -2,24 +2,32 @@
 
 public class GomokuGame : IMcstGame<GomokuMove>
 {
-    private const int WinCount = 3;
+    private const int WinCount = 5;
     private readonly int[,] _board;
     private int _result = Tiles.Empty;
     private int _moveCount = 0;
     
-    public const int DefaultBoardSize = 3;
+    public const int DefaultBoardSize = 7;
     public int NextMove = Tiles.Black;
 
     public GomokuGame(int size = DefaultBoardSize)
     {
         _board = new int[size, size];
         for (int i = 0; i < size; i++)
-        {
             for (int j = 0; j < size; j++)
-            {
                 _board[i, j] = Tiles.Empty;
-            }
-        }
+    }
+
+    private GomokuGame(int[,] board, int result, int moveCount, int nextMove)
+    {
+        _board = new int[board.GetLength(0), board.GetLength(1)];
+        for (int i = 0; i < _board.GetLength(0); i++)
+            for (int j = 0; j < _board.GetLength(1); j++)
+                _board[i, j] = board[i, j];
+        
+        _result = result;
+        _moveCount = moveCount;
+        NextMove = nextMove;
     }
 
     public bool IsGameOver()
@@ -73,6 +81,8 @@ public class GomokuGame : IMcstGame<GomokuMove>
         };
     }
 
+    public IMcstGame<GomokuMove> Clone() => new GomokuGame(_board, _result, _moveCount, NextMove);
+        
     private void SwitchNextMove() =>
         NextMove = NextMove == Tiles.White ? Tiles.Black : Tiles.White;
     

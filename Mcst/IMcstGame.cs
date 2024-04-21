@@ -7,4 +7,5 @@ public interface IMcstGame<TMove>
     void MakeMove(TMove move);
     void UndoMove(TMove move);
     double GetResult();
+    IMcstGame<TMove> Clone();
 }
