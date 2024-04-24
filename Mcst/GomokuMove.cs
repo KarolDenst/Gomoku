@@ -2,6 +2,6 @@
 
 public struct GomokuMove(int row, int col)
 {
-    public int Row = row;
-    public int Col = col;
+    public readonly int Row = row;
+    public readonly int Col = col;
 }

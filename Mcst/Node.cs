@@ -1,6 +1,6 @@
 ﻿namespace MCST;
 
-public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? parent = null)
+public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? parent = null, int selectionConstant = 2)
 {
     public readonly Node<TMove>? Parent = parent;
     public readonly List<Node<TMove>> Children = [];
@@ -20,7 +20,7 @@ public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? pa
     public Node<TMove> SelectChild()
     {
         // UCB1 selection policy
-        return Children.OrderByDescending(c => c._wins / c._visits + Math.Sqrt(2 * Math.Log(_visits) / c._visits)).First();
+        return Children.OrderByDescending(c => c._wins / c._visits + Math.Sqrt(selectionConstant * Math.Log(_visits) / c._visits)).First();
     }
 
     public void Update(double result)
@@ -31,7 +31,7 @@ public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? pa
 
     public TMove GetBestMove()
     {
-        return Children.OrderByDescending(c => c._wins / c._visits).Select(c => c.MoveMade).FirstOrDefault()!;
+        return Children.OrderByDescending(c => c._visits).Select(c => c.MoveMade).FirstOrDefault()!;
     }
     
     public void MergeResults(Node<TMove> other)

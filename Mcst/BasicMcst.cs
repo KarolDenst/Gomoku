@@ -4,13 +4,12 @@ namespace MCST;
 
 public class BasicMcst<TMove>(int iterations, int scoreModifier = 1)
 {
-    private readonly Random _random = new();
-    
     public TMove FindBestMove(IMcstGame<TMove> game)
     {
         var tasks = new List<Task>();
         var sharedResults = new ConcurrentBag<Node<TMove>>();
         int parallelTasks = Environment.ProcessorCount;
+        // int parallelTasks = 1;
         for(int i = 0; i < parallelTasks; i++)
         {
             var task = Task.Run(() =>
@@ -71,8 +70,6 @@ public class BasicMcst<TMove>(int iterations, int scoreModifier = 1)
     {
         while (!game.IsGameOver())
         {
-            // var legalMoves = game.GetLegalMoves();
-            // var randomMove = legalMoves[_random.Next(legalMoves.Count)];
             var randomMove = game.GetRandomMove();
             game.MakeMove(randomMove);
             moveHistory.Push(randomMove);
