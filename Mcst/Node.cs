@@ -1,6 +1,6 @@
 ﻿namespace MCST;
 
-public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? parent = null, int selectionConstant = 2)
+public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? parent = null, int selectionConstant = 5)
 {
     public readonly Node<TMove>? Parent = parent;
     public readonly List<Node<TMove>> Children = [];

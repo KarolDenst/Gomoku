@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MCST.Board;
+﻿namespace MCST.Board;
 
 public class UlongGomokuBoard : IGomokuBoard
 {
