@@ -2,7 +2,7 @@
 
 namespace MCST;
 
-public class BasicMcst<TMove>(int iterations, int scoreModifier = 1)
+public class BasicMcst<TMove>(int iterations)
 {
     public TMove FindBestMove(IMcstGame<TMove> game)
     {
@@ -35,11 +35,12 @@ public class BasicMcst<TMove>(int iterations, int scoreModifier = 1)
     {
         var node = rootNode;
         var moveHistory = new Stack<TMove>();
+        var scoreModifier = game.GetDesiredOutcome();
 
         node = Selection(game, node, moveHistory);
         node = Expansion(game, node, moveHistory);
         Simulation(game, moveHistory);
-        Backpropagation(game, node, moveHistory);
+        Backpropagation(game, node, moveHistory, scoreModifier);
         Cleanup(game, moveHistory);
     }
 
@@ -76,7 +77,7 @@ public class BasicMcst<TMove>(int iterations, int scoreModifier = 1)
         }
     }
 
-    private void Backpropagation(IMcstGame<TMove> game, Node<TMove> node, Stack<TMove> moveHistory)
+    private void Backpropagation(IMcstGame<TMove> game, Node<TMove> node, Stack<TMove> moveHistory, int scoreModifier)
     {
         double result = scoreModifier * game.GetResult();
         while (node != null)

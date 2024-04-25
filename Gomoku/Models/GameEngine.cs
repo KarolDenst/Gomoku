@@ -9,7 +9,7 @@ public class GameEngine(int size = GomokuGame.DefaultBoardSize)
     public readonly int BoardSize = size;
 
     private readonly GomokuGame _game = new(size);
-    private readonly BasicMcst<GomokuMove> _opponent = new(200_000, 1);
+    private readonly BasicMcst<GomokuMove> _opponent = new(200_000);
 
 
     public void MakeMove(int row, int col)

@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gomoku", "Gomoku\Gomoku.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mcst", "Mcst\Mcst.csproj", "{337A5037-B1D7-43C9-8807-572525E7A62F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gomoku.Console", "Gomoku.Console\Gomoku.Console.csproj", "{01453238-A6AD-440E-ACE1-B38F0D685132}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gomoku.CLI", "Gomoku.CLI\Gomoku.CLI.csproj", "{01453238-A6AD-440E-ACE1-B38F0D685132}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

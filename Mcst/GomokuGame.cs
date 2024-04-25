@@ -91,7 +91,17 @@ public class GomokuGame : IMcstGame<GomokuMove>
     }
 
     public IMcstGame<GomokuMove> Clone() => new GomokuGame(_board, _result, NextMove, _legalMoves);
-        
+
+    public int GetDesiredOutcome()
+    {
+        return NextMove switch
+        {
+            Tiles.White => 1,
+            Tiles.Black => -1,
+            _ => 0
+        };
+    }
+
     private void SwitchNextMove() =>
         NextMove = NextMove == Tiles.White ? Tiles.Black : Tiles.White;
     
