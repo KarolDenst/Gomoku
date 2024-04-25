@@ -1,9 +1,11 @@
-﻿namespace MCST;
+﻿using MCST.Board;
+
+namespace MCST;
 
 public class GomokuGame : IMcstGame<GomokuMove>
 {
     private const int WinCount = 5;
-    private readonly int[,] _board;
+    private readonly IGomokuBoard _board;
     private int _result = Tiles.Empty;
     private readonly Random _random = new();
     private readonly HashSet<GomokuMove> _legalMoves;
@@ -13,28 +15,17 @@ public class GomokuGame : IMcstGame<GomokuMove>
 
     public GomokuGame(int size = DefaultBoardSize)
     {
-        _board = new int[size, size];
+        _board = new BasicGomokuBoard(size);
+        _legalMoves = [];
         for (int i = 0; i < size; i++)
             for (int j = 0; j < size; j++)
-                _board[i, j] = Tiles.Empty;
-        _legalMoves = [];
-        for (int i = 0; i < _board.GetLength(1); i++)
-        {
-            for (int j = 0; j < _board.GetLength(1); j++)
-            {
-                if (_board[i,j] == Tiles.Empty)
+                if (_board.GetCell(i, j) == Tiles.Empty)
                     _legalMoves.Add(new GomokuMove(i, j));
-            }
-        }
     }
 
-    private GomokuGame(int[,] board, int result, int nextMove, HashSet<GomokuMove> legalMoves)
+    private GomokuGame(IGomokuBoard board, int result, int nextMove, HashSet<GomokuMove> legalMoves)
     {
-        _board = new int[board.GetLength(0), board.GetLength(1)];
-        for (int i = 0; i < _board.GetLength(0); i++)
-            for (int j = 0; j < _board.GetLength(1); j++)
-                _board[i, j] = board[i, j];
-        
+        _board = board.Clone();
         _result = result;
         NextMove = nextMove;
         _legalMoves = [];
@@ -66,15 +57,16 @@ public class GomokuGame : IMcstGame<GomokuMove>
     {
         if (_result != Tiles.Empty || _legalMoves.Count == 0)
             return;
-        _board[move.Row, move.Col] = NextMove;
+        _board.SetCell(move.Row, move.Col, NextMove);
         _legalMoves.Remove(move);
-        CheckForWin(move.Row, move.Col);
+        if (_board.IsWinning(move.Row, move.Col, WinCount))
+            _result = NextMove;
         SwitchNextMove();
     }
 
     public void UndoMove(GomokuMove move)
     {
-        _board[move.Row, move.Col] = Tiles.Empty;
+        _board.SetCell(move.Row, move.Col, Tiles.Empty);
         _result = Tiles.Empty;
         _legalMoves.Add(move);
         SwitchNextMove();
@@ -104,31 +96,4 @@ public class GomokuGame : IMcstGame<GomokuMove>
 
     private void SwitchNextMove() =>
         NextMove = NextMove == Tiles.White ? Tiles.Black : Tiles.White;
-    
-    private void CheckForWin(int row, int col)
-    {
-        if (CountTiles(row, col, 1, 0) + CountTiles(row, col, -1, 0) >= WinCount - 1 ||
-            CountTiles(row, col, 0, 1) + CountTiles(row, col, 0, -1) >= WinCount - 1 ||
-            CountTiles(row, col, 1, 1) + CountTiles(row, col, -1, -1) >= WinCount - 1 ||
-            CountTiles(row, col, 1, -1) + CountTiles(row, col, -1, 1) >= WinCount - 1)
-        {
-            _result = NextMove;
-        }
-    }
-
-    private int CountTiles(int row, int col, int dRow, int dCol)
-    {
-        int count = 0;
-        int currentRow = row + dRow;
-        int currentCol = col + dCol;
-        while (IsInBounds(currentRow, currentCol) && _board[currentRow, currentCol] == _board[row, col])
-        {
-            count++;
-            currentRow += dRow;
-            currentCol += dCol;
-        }
-        return count;
-    }
-
-    private bool IsInBounds(int row, int col) => row >= 0 && col >= 0 && row < _board.GetLength(0) && col < _board.GetLength(1);
 }

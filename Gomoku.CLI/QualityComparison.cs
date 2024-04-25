@@ -1,4 +1,5 @@
-﻿using MCST;
+﻿using System.Diagnostics;
+using MCST;
 
 
 namespace Gomoku.CLI;
@@ -7,9 +8,9 @@ public static class QualityComparison
 {
     public static void CompareQuality()
     {
-        int iterations = 1_000;
+        var stopwatch = Stopwatch.StartNew();
+        int iterations = 10_000;
         int size = 7;
-
 
         var alg1 = new BasicMcst<GomokuMove>(iterations);
         var alg2 = new BasicMcst<GomokuMove>(iterations);
@@ -44,5 +45,7 @@ public static class QualityComparison
         Console.WriteLine($"Alg1 Wins: {100.0 * alg1Wins / totalGames}%");
         Console.WriteLine($"Alg2 Wins: {100.0 * alg2Wins /totalGames}%");
         Console.WriteLine($"Draws: {100.0 * (totalGames - alg1Wins - alg2Wins) / totalGames}%");
+        Console.WriteLine();
+        Console.WriteLine($"Total Time: {stopwatch.Elapsed}");
     }
 }
