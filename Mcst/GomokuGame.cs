@@ -15,7 +15,7 @@ public class GomokuGame : IMcstGame<GomokuMove>
 
     public GomokuGame(int size = DefaultBoardSize)
     {
-        _board = new BasicGomokuBoard(size);
+        _board = new UlongGomokuBoard(size);
         _legalMoves = [];
         for (int i = 0; i < size; i++)
             for (int j = 0; j < size; j++)

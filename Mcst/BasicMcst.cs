@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace MCST;
 
@@ -27,7 +28,7 @@ public class BasicMcst<TMove>(int iterations)
         var rootNode = new Node<TMove>(game, default);
         foreach (var result in sharedResults)
             rootNode.MergeResults(result);
-
+        
         return rootNode.GetBestMove();
     }
 
@@ -37,11 +38,11 @@ public class BasicMcst<TMove>(int iterations)
         var moveHistory = new Stack<TMove>();
         var scoreModifier = game.GetDesiredOutcome();
 
-        node = Selection(game, node, moveHistory);
-        node = Expansion(game, node, moveHistory);
-        Simulation(game, moveHistory);
-        Backpropagation(game, node, moveHistory, scoreModifier);
-        Cleanup(game, moveHistory);
+        var simGame = game.Clone();
+        node = Selection(simGame, node, moveHistory);
+        node = Expansion(simGame, node, moveHistory);
+        Simulation(simGame, moveHistory);
+        Backpropagation(simGame, node, moveHistory, scoreModifier);
     }
 
     private Node<TMove> Selection(IMcstGame<TMove> game, Node<TMove> node, Stack<TMove> moveHistory)
@@ -89,11 +90,5 @@ public class BasicMcst<TMove>(int iterations)
                 game.UndoMove(moveHistory.Pop());
             }
         }
-    }
-
-    private void Cleanup(IMcstGame<TMove> game, Stack<TMove> moveHistory)
-    {
-        while (moveHistory.Count > 0)
-            game.UndoMove(moveHistory.Pop());
     }
 }
