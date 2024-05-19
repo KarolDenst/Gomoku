@@ -9,4 +9,5 @@ public interface IMcstGame<TMove>
     void UndoMove(TMove move);
     double GetResult();
     IMcstGame<TMove> Clone();
+    int GetDesiredOutcome();
 }

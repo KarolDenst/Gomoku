@@ -5,5 +5,5 @@ public static class Tiles
 {
     public const int Empty = 0;
     public const int White = 1;
-    public const int Black = -1;
+    public const int Black = 2;
 }

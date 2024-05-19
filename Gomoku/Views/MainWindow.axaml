@@ -51,10 +51,10 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
         
-        <StackPanel Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20">
-            <Button Content="Start Game" Width="200" Margin="0 10 0 10" HorizontalContentAlignment="Center"/>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20">
+            <Button Content="New Game" Width="200" Margin="0 10 0 10" HorizontalContentAlignment="Center" Command="{Binding NewGameCommand}"/>
             <Button Content="Settings" Width="200" Margin="0 10 0 10" HorizontalContentAlignment="Center"/>
-            <Button Content="Exit" Width="200" Margin="0 10 0 10" HorizontalContentAlignment="Center"/>
+            <Button Content="Exit" Width="200" Margin="0 10 0 10" HorizontalContentAlignment="Center" Command="{Binding ExitCommand}"/>
         </StackPanel>
     </DockPanel>
     
