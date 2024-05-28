@@ -1,4 +1,5 @@
 import numpy as np
+
 EMPTY = 0
 PLAYER1 = 1
 PLAYER2 = -1
@@ -17,11 +18,14 @@ class Gomoku:
             raise ValueError("Invalid action")
         state[row, col] = player
         return state
-    
+
     def get_moves(self, state):
         return (state.reshape(-1) == EMPTY).astype(np.uint8)
 
     def check_win(self, state, action):
+        if action is None:
+            return False
+
         row = action // self.size
         col = action % self.size
         player = state[row, col]
@@ -51,46 +55,38 @@ class Gomoku:
                 return True
 
         return False
-    
-    def get_decisive_and_terminated(self, state, action):
+
+    def get_value_and_terminated(self, state, action):
         if self.check_win(state, action):
-            return True, True
+            return 1, True
         if np.sum(state == EMPTY) == 0:
-            return False, True
-        return False, False
-    
+            return 0, True
+        return 0, False
+
     def get_opponent(self, player):
         return PLAYER1 if player == PLAYER2 else PLAYER2
-    
+
+    def get_opponent_value(self, player):
+        return -player
+
+    def change_perspective(self, state, player):
+        return state * player
+
+    def get_encoded_state(self, state):
+        encoded_state = np.stack(
+            (state == PLAYER1, state == PLAYER2, state == EMPTY)
+        ).astype(np.float32)
+
+        if len(state.shape) == 3:
+            encoded_state = np.swapaxes(encoded_state, 0, 1)
+        
+        return encoded_state
+
+
     def print(self, state):
         board_str = ''
         for row in range(self.size):
             row_str = ' '.join(str(state[row, col]) if state[row, col] != EMPTY else '.' for col in range(self.size))
             board_str += row_str + '\n'
+        board_str = board_str.replace('-1', 'O').replace('1', 'X')
         print(board_str)
-        
-game = Gomoku()
-player = PLAYER1
-
-state = game.get_initial_state()
-
-while True:
-    game.print(state)
-    valid_moves = game.get_moves(state)
-    print("Valid moves:", [i for i in range(game.size * game.size) if valid_moves[i] == 1])
-    action = int(input("Enter action: "))
-    
-    if valid_moves[action] == 0:
-        print("Invalid move")
-        continue
-    
-    state = game.get_next_state(state, action, player)
-    decisive, terminated = game.get_decisive_and_terminated(state, action)
-    if terminated:
-        if decisive == 1:
-            print("Player", player, "wins")
-        else:
-            print("Draw")
-        break
-
-    player = game.get_opponent(player)
