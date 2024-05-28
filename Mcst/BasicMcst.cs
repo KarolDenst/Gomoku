@@ -1,9 +1,10 @@
-﻿using System.Collections.Concurrent;
+﻿using MCST.Enums;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace MCST;
 
-public class BasicMcst<TMove>(int iterations)
+public class BasicMcst<TMove>(int iterations, MctsVersion mctsVersion)
 {
     public TMove FindBestMove(IMcstGame<TMove> game)
     {
@@ -49,7 +50,7 @@ public class BasicMcst<TMove>(int iterations)
     {
         while (node.UntriedMoves.Count == 0 && node.Children.Count > 0)
         {
-            node = node.SelectChild();
+            node = node.SelectChild(mctsVersion);
             game.MakeMove(node.MoveMade);
             moveHistory.Push(node.MoveMade);
         }

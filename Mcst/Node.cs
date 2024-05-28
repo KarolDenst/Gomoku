@@ -1,4 +1,6 @@
-﻿namespace MCST;
+﻿using MCST.Enums;
+
+namespace MCST;
 
 public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? parent = null, int selectionConstant = 5)
 {
@@ -17,11 +19,16 @@ public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? pa
         return childNode;
     }
 
-    public Node<TMove> SelectChild()
+    public Node<TMove> SelectChild(MctsVersion mctsVersion)
     {
-        // UCB1 selection policy
-        return Children.OrderByDescending(c => c._wins / c._visits + Math.Sqrt(selectionConstant * Math.Log(_visits) / c._visits)).First();
-    }
+		// UCB1 selection policy
+		return mctsVersion switch
+		{
+			MctsVersion.BasicUct => Children.OrderByDescending(c => c._wins / c._visits + Math.Sqrt(selectionConstant * Math.Log(_visits) / c._visits)).First(),
+            // todo: other mcts versions
+			_ => throw new ArgumentException($"Invalid MCTS version: {mctsVersion}"),
+		};
+	}
 
     public void Update(double result)
     {
