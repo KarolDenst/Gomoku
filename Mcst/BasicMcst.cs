@@ -12,14 +12,15 @@ public class BasicMcst<TMove>(int iterations, MctsVersion mctsVersion)
         var sharedResults = new ConcurrentBag<Node<TMove>>();
         int parallelTasks = Environment.ProcessorCount;
         // int parallelTasks = 1;
+        if (mctsVersion == MctsVersion.Ucb1Normal) parallelTasks = 1; // ucb1 normal can't be run in parallel
         for(int i = 0; i < parallelTasks; i++)
         {
             var task = Task.Run(() =>
             {
                 var newGame = game.Clone();
                 var node = new Node<TMove>(game, default);
-                for (int i = 0; i < iterations / parallelTasks; i++)
-                    RunIteration(newGame, node);
+                for (int j = 0; j < iterations / parallelTasks; j++)
+                    RunIteration(newGame, node, j+1);
                 sharedResults.Add(node);
             });
             tasks.Add(task);
@@ -33,26 +34,69 @@ public class BasicMcst<TMove>(int iterations, MctsVersion mctsVersion)
         return rootNode.GetBestMove();
     }
 
-    private void RunIteration(IMcstGame<TMove> game, Node<TMove> rootNode)
+    private void RunIteration(IMcstGame<TMove> game, Node<TMove> rootNode, int iteration)
     {
         var node = rootNode;
         var moveHistory = new Stack<TMove>();
         var scoreModifier = game.GetDesiredOutcome();
 
         var simGame = game.Clone();
-        node = Selection(simGame, node, moveHistory);
-        node = Expansion(simGame, node, moveHistory);
-        Simulation(simGame, moveHistory);
+        node = Selection(simGame, node, moveHistory, iteration);
+        node = Expansion(simGame, node, moveHistory); // wykonuje ruch na wybrany wierzcholek
+        Simulation(simGame, moveHistory); // prowadzi dalej symulacje gry do konca
         Backpropagation(simGame, node, moveHistory, scoreModifier);
     }
 
-    private Node<TMove> Selection(IMcstGame<TMove> game, Node<TMove> node, Stack<TMove> moveHistory)
+    private Node<TMove> Selection(IMcstGame<TMove> game, Node<TMove> node, Stack<TMove> moveHistory, int iteration)
     {
-        while (node.UntriedMoves.Count == 0 && node.Children.Count > 0)
+        if (mctsVersion == MctsVersion.Ucb1Normal)
         {
-            node = node.SelectChild(mctsVersion);
-            game.MakeMove(node.MoveMade);
-            moveHistory.Push(node.MoveMade);
+            while (node.UntriedMoves.Count == 0 && node.Children.Count > 0/* && node.Visits >= Math.Ceiling(8 * Math.Log(iteration, 10))*/)
+            {
+                bool end = false;
+                foreach (var child in node.Children)
+                {
+                    if (child.Visits < Math.Ceiling(8 * Math.Log(iteration, 10)))
+                    {
+                        end = true;
+                        node = child;
+                        break;
+                    }
+                }
+                if (end) break;
+                node = node.SelectChild(mctsVersion, iteration);
+				game.MakeMove(node.MoveMade);
+				moveHistory.Push(node.MoveMade);
+			}
+        }
+        else if(mctsVersion == MctsVersion.Ucb1Tuned)
+        {
+			while (node.UntriedMoves.Count == 0 && node.Children.Count > 0/* && node.Visits >= Math.Ceiling(8 * Math.Log(iteration, 10))*/)
+			{
+				bool end = false;
+				foreach (var child in node.Children)
+				{
+					if (child.Visits < 2)
+					{
+						end = true;
+						node = child;
+						break;
+					}
+				}
+				if (end) break;
+				node = node.SelectChild(mctsVersion, iteration);
+				game.MakeMove(node.MoveMade);
+				moveHistory.Push(node.MoveMade);
+			}
+		}
+        else
+        {
+            while (node.UntriedMoves.Count == 0 && node.Children.Count > 0) // while all children have been tried already
+            {
+                node = node.SelectChild(mctsVersion, iteration);
+                game.MakeMove(node.MoveMade);
+                moveHistory.Push(node.MoveMade);
+            }
         }
 
         return node;
@@ -86,7 +130,7 @@ public class BasicMcst<TMove>(int iterations, MctsVersion mctsVersion)
         {
             node.Update(result);
             node = node.Parent;
-            if (node != null)  // Ensure we don't undo the move of the root node as it has no parent
+            if (node != null && moveHistory.Count() > 0)  // Ensure we don't undo the move of the root node as it has no parent
             {
                 game.UndoMove(moveHistory.Pop());
             }
