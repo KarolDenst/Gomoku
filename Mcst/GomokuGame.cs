@@ -77,7 +77,7 @@ public class GomokuGame : IMcstGame<GomokuMove>
         return _result switch
         {
             Tiles.White => 1,
-            Tiles.Black => -1,
+            Tiles.Black => 0,
             _ => 0
         };
     }
