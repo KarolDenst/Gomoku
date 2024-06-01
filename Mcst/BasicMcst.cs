@@ -42,64 +42,36 @@ public class BasicMcst<TMove>(int iterations, MctsVersion mctsVersion)
 
         var simGame = game.Clone();
         node = Selection(simGame, node, moveHistory, iteration);
-        node = Expansion(simGame, node, moveHistory); // wykonuje ruch na wybrany wierzcholek
-        Simulation(simGame, moveHistory); // prowadzi dalej symulacje gry do konca
+        node = Expansion(simGame, node, moveHistory);
+        Simulation(simGame, moveHistory);
         Backpropagation(simGame, node, moveHistory, scoreModifier);
     }
 
     private Node<TMove> Selection(IMcstGame<TMove> game, Node<TMove> node, Stack<TMove> moveHistory, int iteration)
     {
-        if (mctsVersion == MctsVersion.Ucb1Normal)
+		var requiredChildVisits = mctsVersion switch
+		{
+			MctsVersion.BasicUct => 0,
+			MctsVersion.Ucb1Tuned => 2,
+			MctsVersion.Ucb1Normal => Math.Ceiling(8 * Math.Log(iteration, 10)),
+			_ => throw new ArgumentException($"Invalid MCTS version: {mctsVersion}"),
+		};
+
+        while (node.UntriedMoves.Count == 0 && node.Children.Count > 0)
         {
-            while (node.UntriedMoves.Count == 0 && node.Children.Count > 0/* && node.Visits >= Math.Ceiling(8 * Math.Log(iteration, 10))*/)
+            foreach (var child in node.Children)
             {
-                bool end = false;
-                foreach (var child in node.Children)
+                if (child.Visits < requiredChildVisits)
                 {
-                    if (child.Visits < Math.Ceiling(8 * Math.Log(iteration, 10)))
-                    {
-                        end = true;
-                        node = child;
-                        break;
-                    }
+                    return child;
                 }
-                if (end) break;
-                node = node.SelectChild(mctsVersion, iteration);
-				game.MakeMove(node.MoveMade);
-				moveHistory.Push(node.MoveMade);
-			}
-        }
-        else if(mctsVersion == MctsVersion.Ucb1Tuned)
-        {
-			while (node.UntriedMoves.Count == 0 && node.Children.Count > 0/* && node.Visits >= Math.Ceiling(8 * Math.Log(iteration, 10))*/)
-			{
-				bool end = false;
-				foreach (var child in node.Children)
-				{
-					if (child.Visits < 2)
-					{
-						end = true;
-						node = child;
-						break;
-					}
-				}
-				if (end) break;
-				node = node.SelectChild(mctsVersion, iteration);
-				game.MakeMove(node.MoveMade);
-				moveHistory.Push(node.MoveMade);
-			}
-		}
-        else
-        {
-            while (node.UntriedMoves.Count == 0 && node.Children.Count > 0) // while all children have been tried already
-            {
-                node = node.SelectChild(mctsVersion, iteration);
-                game.MakeMove(node.MoveMade);
-                moveHistory.Push(node.MoveMade);
             }
+            node = node.SelectChild(mctsVersion);
+            game.MakeMove(node.MoveMade);
+            moveHistory.Push(node.MoveMade);
         }
 
-        return node;
+		return node;
     }
 
     private Node<TMove> Expansion(IMcstGame<TMove> game, Node<TMove> node, Stack<TMove> moveHistory)

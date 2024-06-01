@@ -7,7 +7,6 @@ public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? pa
     public readonly Node<TMove>? Parent = parent;
     public readonly List<Node<TMove>> Children = [];
     public readonly List<TMove> UntriedMoves = [..gameState.GetLegalMoves()];
-    //public Dictionary<TMove, int> TriedMovesCounts = new(); // how many times a move was tried
     public readonly TMove MoveMade = move;
     private double _wins = 0;
     public int Visits = 0;
@@ -20,7 +19,7 @@ public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? pa
         return childNode;
     }
 
-    public Node<TMove> SelectChild(MctsVersion mctsVersion, int iteration)
+    public Node<TMove> SelectChild(MctsVersion mctsVersion)
     {
         // UCB1 selection policy
         return mctsVersion switch
