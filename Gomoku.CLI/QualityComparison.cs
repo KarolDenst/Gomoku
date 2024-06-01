@@ -9,11 +9,11 @@ public static class QualityComparison
     public static void CompareQuality()
     {
         var stopwatch = Stopwatch.StartNew();
-        int iterations = 10_000;
+        int iterations = 60_000;
         int size = 7;
 
-        var alg1 = new BasicMcst<GomokuMove>(iterations);
-        var alg2 = new BasicMcst<GomokuMove>(iterations);
+        var alg1 = new BasicMcst<GomokuMove>(iterations, MCST.Enums.MctsVersion.BasicUct);
+        var alg2 = new BasicMcst<GomokuMove>(iterations, MCST.Enums.MctsVersion.Ucb1Normal);
 
         int alg1Wins = 0;
         int alg2Wins = 0;
