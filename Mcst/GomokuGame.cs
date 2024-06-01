@@ -78,7 +78,7 @@ public class GomokuGame : IMcstGame<GomokuMove>
         {
             Tiles.White => 1,
             Tiles.Black => 0,
-            _ => 0
+            _ => 0.5
         };
     }
 
