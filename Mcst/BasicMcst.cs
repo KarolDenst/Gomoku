@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace MCST;
 
-public class BasicMcst<TMove>(int iterations, MctsVersion mctsVersion)
+public class BasicMcst<TMove>(int iterations, MctsVersion mctsVersion) where TMove : IMove
 {
     public TMove FindBestMove(IMcstGame<TMove> game)
     {
@@ -52,6 +52,7 @@ public class BasicMcst<TMove>(int iterations, MctsVersion mctsVersion)
 		var requiredChildVisits = mctsVersion switch
 		{
 			MctsVersion.BasicUct => 0,
+            MctsVersion.Heuristic => 0,
 			MctsVersion.Ucb1Tuned => 2,
 			MctsVersion.Ucb1Normal => Math.Ceiling(8 * Math.Log(iteration, 10)),
 			_ => throw new ArgumentException($"Invalid MCTS version: {mctsVersion}"),
@@ -66,7 +67,7 @@ public class BasicMcst<TMove>(int iterations, MctsVersion mctsVersion)
                     return child;
                 }
             }
-            node = node.SelectChild(mctsVersion);
+            node = node.SelectChild(mctsVersion, game);
             game.MakeMove(node.MoveMade);
             moveHistory.Push(node.MoveMade);
         }
