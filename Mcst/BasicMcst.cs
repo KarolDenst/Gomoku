@@ -31,7 +31,7 @@ public class BasicMcst<TMove>(int iterations, MctsVersion mctsVersion) where TMo
         foreach (var result in sharedResults)
             rootNode.MergeResults(result);
         
-        return rootNode.GetBestMove();
+        return rootNode.GetBestMove(mctsVersion, game);
     }
 
     private void RunIteration(IMcstGame<TMove> game, Node<TMove> rootNode, int iteration)

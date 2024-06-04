@@ -13,5 +13,6 @@ public interface IMcstGame<TMove>
     IMcstGame<TMove> Clone();
     int GetDesiredOutcome();
 	IGomokuBoard GetBoard();
+    TMove GetMiddleOfBoard();
 	List<GomokuMove> GetNeighbors(int row, int col);
 }

@@ -5,8 +5,8 @@ namespace MCST;
 public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? parent = null, int selectionConstant = 5) where TMove : IMove
 {
     public readonly Node<TMove>? Parent = parent;
-    public readonly List<Node<TMove>> Children = [];
-    public readonly List<TMove> UntriedMoves = [..gameState.GetLegalMoves()]; // wszystkie wolne pola?
+    public List<Node<TMove>> Children = new();
+    public readonly List<TMove> UntriedMoves = new(gameState.GetLegalMoves()); // wszystkie wolne pola?
 	public readonly TMove MoveMade = move;
     private double _wins = 0;
     public int Visits = 0;
@@ -63,9 +63,14 @@ public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? pa
         _wins += result;
     }
 
-    public TMove GetBestMove()
+    public TMove GetBestMove(MctsVersion mctsVersion, IMcstGame<TMove> game)
     {
-		return Children.OrderByDescending(c => c.Visits).First().MoveMade;
+        if (Children.Count == 0 && mctsVersion == MctsVersion.Heuristic)
+        {
+            return game.GetMiddleOfBoard();
+        }
+
+		return Children.OrderByDescending(c => c.Visits).Select(c => c.MoveMade).FirstOrDefault();
 	}
     
     public void MergeResults(Node<TMove> other)

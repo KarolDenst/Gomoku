@@ -99,6 +99,11 @@ public class GomokuGame : IMcstGame<GomokuMove>
 		return _board;
 	}
 
+    public GomokuMove GetMiddleOfBoard()
+    {
+        return new GomokuMove(_size / 2, _size / 2);
+    }
+
 	public IMcstGame<GomokuMove> Clone() => new GomokuGame(_board, _result, NextMove, _legalMoves, _size);
 
     public int GetDesiredOutcome()
