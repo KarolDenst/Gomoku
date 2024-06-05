@@ -2,12 +2,12 @@
 
 namespace MCST;
 
-public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? parent = null, int selectionConstant = 5)
+public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? parent = null, int selectionConstant = 5) where TMove : IMove
 {
     public readonly Node<TMove>? Parent = parent;
-    public readonly List<Node<TMove>> Children = [];
-    public readonly List<TMove> UntriedMoves = [..gameState.GetLegalMoves()];
-    public readonly TMove MoveMade = move;
+    public List<Node<TMove>> Children = new();
+    public readonly List<TMove> UntriedMoves = new(gameState.GetLegalMoves()); // wszystkie wolne pola?
+	public readonly TMove MoveMade = move;
     private double _wins = 0;
     public int Visits = 0;
 
@@ -19,24 +19,42 @@ public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? pa
         return childNode;
     }
 
-    public Node<TMove> SelectChild(MctsVersion mctsVersion)
+    public Node<TMove> SelectChild(MctsVersion mctsVersion, IMcstGame<TMove> game)
     {
         // UCB1 selection policy
-        return mctsVersion switch
+        var sortedChildren = mctsVersion switch
         {
-            MctsVersion.BasicUct => Children.OrderByDescending(c => c._wins / c.Visits + Math.Sqrt(selectionConstant * Math.Log(Visits) / c.Visits)).First(),
-            MctsVersion.Ucb1Tuned => Children.OrderByDescending(c =>
+            MctsVersion.BasicUct => Children.OrderByDescending(c => c._wins / c.Visits + Math.Sqrt(selectionConstant * Math.Log(Visits) / c.Visits)),
+            MctsVersion.Heuristic => Children.OrderByDescending(c => c._wins / c.Visits + Math.Sqrt(selectionConstant * Math.Log(Visits) / c.Visits)),
+			MctsVersion.Ucb1Tuned => Children.OrderByDescending(c =>
 			{
 				double averageReward = c._wins / c.Visits;
 				double variance = (c._wins - c.Visits * averageReward * averageReward) / (c.Visits - 1);
 				double ucbTunedValue = averageReward + Math.Sqrt(Math.Log(Visits) / c.Visits * Math.Min(0.25, variance + Math.Sqrt(2 * Math.Log(Visits) / c.Visits)));
 
 				return ucbTunedValue;
-			}).First(),
+			}),
 			MctsVersion.Ucb1Normal => Children.
-			 OrderByDescending(c => c._wins / c.Visits + Math.Sqrt(16*((c._wins - c.Visits * (c._wins / c.Visits) * (c._wins / c.Visits))/(c.Visits - 1)) * (Math.Log(Visits-1)/c.Visits))).First(),
+			 OrderByDescending(c => c._wins / c.Visits + Math.Sqrt(16*((c._wins - c.Visits * (c._wins / c.Visits) * (c._wins / c.Visits))/(c.Visits - 1)) * (Math.Log(Visits-1)/c.Visits))),
 			_ => throw new ArgumentException($"Invalid MCTS version: {mctsVersion}"),
         };
+
+        if (mctsVersion == MctsVersion.Heuristic)
+        {
+            foreach (var child in sortedChildren)
+            {
+                var neighbors = game.GetNeighbors(child.MoveMade.Row, child.MoveMade.Col);
+                foreach (var neighbor in neighbors)
+                {
+                    if (game.GetBoard().GetCell(neighbor.Row, neighbor.Col) != Tiles.Empty)
+                    {
+                        return child;
+                    }
+                }
+            }
+        }
+
+		return sortedChildren.First();
 	}
 
     public void Update(double result)
@@ -45,10 +63,15 @@ public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? pa
         _wins += result;
     }
 
-    public TMove GetBestMove()
+    public TMove GetBestMove(MctsVersion mctsVersion, IMcstGame<TMove> game)
     {
-        return Children.OrderByDescending(c => c.Visits).Select(c => c.MoveMade).FirstOrDefault()!;
-    }
+        if (Children.Count == 0 && mctsVersion == MctsVersion.Heuristic)
+        {
+            return game.GetMiddleOfBoard();
+        }
+
+		return Children.OrderByDescending(c => c.Visits).Select(c => c.MoveMade).FirstOrDefault();
+	}
     
     public void MergeResults(Node<TMove> other)
     {
