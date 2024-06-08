@@ -51,11 +51,28 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
         
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20">
-            <Button Content="New Game" Width="200" Margin="0 10 0 10" HorizontalContentAlignment="Center" Command="{Binding NewGameCommand}"/>
-            <Button Content="Settings" Width="200" Margin="0 10 0 10" HorizontalContentAlignment="Center"/>
-            <Button Content="Exit" Width="200" Margin="0 10 0 10" HorizontalContentAlignment="Center" Command="{Binding ExitCommand}"/>
+        <StackPanel VerticalAlignment="Top" HorizontalAlignment="Right" Margin="20">
+            <TextBlock Text="Settings" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+            <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="5" Padding="10">
+                <StackPanel>
+                    <Button Content="New Game" Width="240" Margin="0 10 0 10" HorizontalContentAlignment="Center" Command="{Binding NewGameCommand}"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10, 10, 10, 10">
+                        <TextBlock Text="Size" Margin="10,10,10,10"/>
+                        <NumericUpDown Minimum="5" Maximum="15" Value="{Binding BoardSize, Mode=TwoWay}" Increment="1"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10, 10, 10, 10">
+                        <TextBlock Text="Iterations" Margin="10,10,10,10"/>
+                        <NumericUpDown Minimum="100000" Maximum="1000000" Value="{Binding Iterations, Mode=TwoWay}" Increment="50000"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10, 10, 10, 10">
+                        <TextBlock Text="Variant" Margin="10,10,10,10"/>
+                        <ComboBox ItemsSource="{Binding MctsVersions}" SelectedItem="{Binding SelectedMctsVersion, Mode=TwoWay}"/>
+                    </StackPanel>
+                    <Button Content="Exit" Width="240" Margin="0 10 0 10" HorizontalContentAlignment="Center" Command="{Binding ExitCommand}"/>
+                </StackPanel>
+            </Border>
         </StackPanel>
+
     </DockPanel>
     
 </Window>

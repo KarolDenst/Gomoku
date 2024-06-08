@@ -41,6 +41,7 @@ public static class QualityComparison
         }
 
         Console.WriteLine($"Number of iterations: {iterations}");
+        Console.WriteLine($"Total Games: {totalGames}");
         Console.WriteLine($"Alg1 Wins: {100.0 * alg1Wins / totalGames}%");
         Console.WriteLine($"Alg2 Wins: {100.0 * alg2Wins /totalGames}%");
         Console.WriteLine($"Draws: {100.0 * (totalGames - alg1Wins - alg2Wins) / totalGames}%");
