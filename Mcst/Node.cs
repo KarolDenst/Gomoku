@@ -75,7 +75,8 @@ public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? pa
             return game.GetMiddleOfBoard();
         }
 
-        return Children.MaxBy(c => c.Visits).MoveMade;
+        var bestNode = Children.MaxBy(c => c.Visits);
+        return bestNode is not null ? bestNode.MoveMade : default;
 	}
     
     public void MergeResults(Node<TMove> other)
