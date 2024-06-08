@@ -1,6 +1,5 @@
 ﻿using MCST.Enums;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 
 namespace MCST;
 
@@ -37,17 +36,16 @@ public class BasicMcst<TMove>(int iterations, MctsVersion mctsVersion) where TMo
     private void RunIteration(IMcstGame<TMove> game, Node<TMove> rootNode, int iteration)
     {
         var node = rootNode;
-        var moveHistory = new Stack<TMove>();
         var scoreModifier = game.GetDesiredOutcome();
 
         var simGame = game.Clone();
-        node = Selection(simGame, node, moveHistory, iteration);
-        node = Expansion(simGame, node, moveHistory);
-        Simulation(simGame, moveHistory);
-        Backpropagation(simGame, node, moveHistory, scoreModifier);
+        node = Selection(simGame, node, iteration);
+        node = Expansion(simGame, node);
+        Simulation(simGame);
+        Backpropagation(simGame, node, scoreModifier);
     }
 
-    private Node<TMove> Selection(IMcstGame<TMove> game, Node<TMove> node, Stack<TMove> moveHistory, int iteration)
+    private Node<TMove> Selection(IMcstGame<TMove> game, Node<TMove> node, int iteration)
     {
 		var requiredChildVisits = mctsVersion switch
 		{
@@ -69,44 +67,37 @@ public class BasicMcst<TMove>(int iterations, MctsVersion mctsVersion) where TMo
             }
             node = node.SelectChild(mctsVersion, game);
             game.MakeMove(node.MoveMade);
-            moveHistory.Push(node.MoveMade);
         }
 
 		return node;
     }
 
-    private Node<TMove> Expansion(IMcstGame<TMove> game, Node<TMove> node, Stack<TMove> moveHistory)
+    private Node<TMove> Expansion(IMcstGame<TMove> game, Node<TMove> node)
     {
         if (node.UntriedMoves.Count <= 0) return node;
         var move = node.UntriedMoves.First();
         game.MakeMove(move);
-        moveHistory.Push(move);
         node = node.AddChild(move, game);
 
         return node;
     }
 
-    private void Simulation(IMcstGame<TMove> game, Stack<TMove> moveHistory)
+    private void Simulation(IMcstGame<TMove> game)
     {
         while (!game.IsGameOver())
         {
             var randomMove = game.GetRandomMove();
             game.MakeMove(randomMove);
-            moveHistory.Push(randomMove);
         }
     }
 
-    private void Backpropagation(IMcstGame<TMove> game, Node<TMove> node, Stack<TMove> moveHistory, int scoreModifier)
+    private void Backpropagation(IMcstGame<TMove> game, Node<TMove> node, int scoreModifier)
     {
         double result = scoreModifier * game.GetResult();
         while (node != null)
         {
             node.Update(result);
             node = node.Parent;
-            if (node != null && moveHistory.Count() > 0)  // Ensure we don't undo the move of the root node as it has no parent
-            {
-                game.UndoMove(moveHistory.Pop());
-            }
         }
     }
 }

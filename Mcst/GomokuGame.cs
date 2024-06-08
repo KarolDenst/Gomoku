@@ -11,7 +11,7 @@ public class GomokuGame : IMcstGame<GomokuMove>
 	private readonly Random _random = new();
     private readonly HashSet<GomokuMove> _legalMoves;
         
-    public const int DefaultBoardSize = 7;
+    public const int DefaultBoardSize = 10;
     public int NextMove = Tiles.Black;
 
     public GomokuGame(int size = DefaultBoardSize)
