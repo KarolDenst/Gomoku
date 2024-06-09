@@ -15,4 +15,5 @@ public interface IMcstGame<TMove>
 	IGomokuBoard GetBoard();
     TMove GetMiddleOfBoard();
 	List<GomokuMove> GetNeighbors(int row, int col);
+	double EvaluateBoard();
 }

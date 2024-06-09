@@ -2,7 +2,7 @@
 
 namespace MCST;
 
-public class GomokuGame : IMcstGame<GomokuMove>
+public partial class GomokuGame : IMcstGame<GomokuMove>
 {
     private const int WinCount = 5;
     private readonly IGomokuBoard _board;

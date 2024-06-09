@@ -1,4 +1,5 @@
 ﻿using Gomoku.CLI;
 
-QualityComparison.CompareQuality(6);
+QualityComparison.CompareQuality(size: 8);
+QualityComparison.CompareQuality(size: 5);
 
