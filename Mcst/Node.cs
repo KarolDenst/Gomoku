@@ -21,26 +21,10 @@ public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? pa
 
     public Node<TMove> SelectChild(MctsVersion mctsVersion, IMcstGame<TMove> game)
     {
-        // UCB1 selection policy
-        var sortedChildren = mctsVersion switch
-        {
-            MctsVersion.BasicUct => Children.OrderByDescending(c => c._wins / c.Visits + Math.Sqrt(selectionConstant * Math.Log(Visits) / c.Visits)),
-            MctsVersion.Heuristic => Children.OrderByDescending(c => c._wins / c.Visits + Math.Sqrt(selectionConstant * Math.Log(Visits) / c.Visits)),
-			MctsVersion.Ucb1Tuned => Children.OrderByDescending(c =>
-			{
-				double averageReward = c._wins / c.Visits;
-				double variance = (c._wins - c.Visits * averageReward * averageReward) / (c.Visits - 1);
-				double ucbTunedValue = averageReward + Math.Sqrt(Math.Log(Visits) / c.Visits * Math.Min(0.25, variance + Math.Sqrt(2 * Math.Log(Visits) / c.Visits)));
-
-				return ucbTunedValue;
-			}),
-			MctsVersion.Ucb1Normal => Children.
-			 OrderByDescending(c => c._wins / c.Visits + Math.Sqrt(16*((c._wins - c.Visits * (c._wins / c.Visits) * (c._wins / c.Visits))/(c.Visits - 1)) * (Math.Log(Visits-1)/c.Visits))),
-			_ => throw new ArgumentException($"Invalid MCTS version: {mctsVersion}"),
-        };
-
         if (mctsVersion == MctsVersion.Heuristic)
         {
+            var sortedChildren = Children.OrderByDescending(c =>
+                c._wins / c.Visits + Math.Sqrt(selectionConstant * Math.Log(Visits) / c.Visits));
             foreach (var child in sortedChildren)
             {
                 var neighbors = game.GetNeighbors(child.MoveMade.Row, child.MoveMade.Col);
@@ -52,10 +36,31 @@ public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? pa
                     }
                 }
             }
+            return sortedChildren.First();
         }
 
-		return sortedChildren.First();
-	}
+        return mctsVersion switch
+        {
+            MctsVersion.BasicUct => Children.MaxBy(c =>
+                c._wins / c.Visits + Math.Sqrt(selectionConstant * Math.Log(Visits) / c.Visits)),
+            MctsVersion.Ucb1Tuned => Children.MaxBy(c =>
+            {
+                double averageReward = c._wins / c.Visits;
+                double variance = (c._wins - c.Visits * averageReward * averageReward) / (c.Visits - 1);
+                double ucbTunedValue = averageReward + Math.Sqrt(Math.Log(Visits) / c.Visits *
+                                                                 Math.Min(0.25,
+                                                                     variance + Math.Sqrt(2 * Math.Log(Visits) /
+                                                                         c.Visits)));
+
+                return ucbTunedValue;
+            }),
+            MctsVersion.Ucb1Normal => Children.MaxBy(c =>
+                c._wins / c.Visits + Math.Sqrt(16 *
+                                               ((c._wins - c.Visits * (c._wins / c.Visits) * (c._wins / c.Visits)) /
+                                                (c.Visits - 1)) * (Math.Log(Visits - 1) / c.Visits))),
+            _ => throw new ArgumentException($"Invalid MCTS version: {mctsVersion}"),
+        };
+    }
 
     public void Update(double result)
     {
@@ -70,7 +75,8 @@ public class Node<TMove>(IMcstGame<TMove> gameState, TMove move, Node<TMove>? pa
             return game.GetMiddleOfBoard();
         }
 
-		return Children.OrderByDescending(c => c.Visits).Select(c => c.MoveMade).FirstOrDefault();
+        var bestNode = Children.MaxBy(c => c.Visits);
+        return bestNode is not null ? bestNode.MoveMade : default;
 	}
     
     public void MergeResults(Node<TMove> other)
