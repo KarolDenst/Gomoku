@@ -6,12 +6,13 @@ namespace Gomoku.CLI;
 
 public static class QualityComparison
 {
-    public static void CompareQuality(int size = 10, int iterations = 60_000)
+    public static void CompareQuality(int size = 8, int iterations = 120_000)
     {
         var stopwatch = Stopwatch.StartNew();
 
         var alg1 = new BasicMcst<GomokuMove>(iterations, MCST.Enums.MctsVersion.BasicUct);
-        var alg2 = new BasicMcst<GomokuMove>(iterations, MCST.Enums.MctsVersion.Heuristic);
+        var alg2 = new BasicMcst<GomokuMove>(120_000, MCST.Enums.MctsVersion.BasicUct);
+        // var alg2 = new AlphaBeta<GomokuMove>(2);
 
         int alg1Wins = 0;
         int alg2Wins = 0;
@@ -35,9 +36,17 @@ public static class QualityComparison
             }
 
             var result = game.GetResult();
-            if (i % 2 != 0) result *= -1;
-            if (result > 0) alg1Wins++;
-            if (result < 0) alg2Wins++;
+            var eps = 0.1;
+            if (Math.Abs(result - 0) < eps)
+            {
+                if (i % 2 == 0) alg1Wins++;
+                else alg2Wins++;
+            }
+            else if (Math.Abs(result - 1) < eps)
+            {
+                if (i % 2 == 0) alg2Wins++;
+                else alg1Wins++;
+            }
         }
 
         Console.WriteLine($"Number of iterations: {iterations}");
